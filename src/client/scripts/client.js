@@ -3,33 +3,38 @@ import App from '../../app';
 
 var attachElement = document.getElementById('app');
 
-var state = {
-  cart: {
-    title: 'My Cart',
-    items: [
-      {
-        title: 'Item 1',
-        price: 12
-      },
-      {
-        title: 'Item 2',
-        price: 21
-      },
-      {
-        title: 'Item 3',
-        price: 33
-      }
-    ]
-  }
-};
-
 var app;
 
 Debug.enable('myApp*');
 
-// Create new app and attach to element
-app = new App({
-  state: state
-});
+// fork getUserMedia for multiple browser versions, for the future
+// when more browsers support MediaRecorder
 
-app.renderToDOM(attachElement);
+navigator.getUserMedia = ( navigator.getUserMedia ||
+                       navigator.webkitGetUserMedia ||
+                       navigator.mozGetUserMedia ||
+                       navigator.msGetUserMedia);
+
+var onError = function(err) {
+  console.log('The following error occured: ' + err);
+}
+
+var onSuccess = function(stream) {
+// Create new app and attach to element
+  console.log("found stream: ", stream)
+  app = new App({
+    state: {
+      stream: stream,
+    }
+  });
+  app.renderToDOM(attachElement);
+}
+
+
+if (navigator.getUserMedia) {
+  navigator.getUserMedia({ audio: true }, onSuccess, onError);
+} else {
+   console.log('getUserMedia not supported on your browser!');
+}
+
+

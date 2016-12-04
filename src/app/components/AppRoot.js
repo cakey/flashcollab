@@ -1,7 +1,7 @@
 import React from 'react/addons';
-import Cart from './Cart';
 
-import config from '../../../config/app';
+
+import AudioRecorder from './AudioRecorder';
 
 /*
  * @class AppRoot
@@ -29,8 +29,7 @@ class AppRoot extends React.Component {
    */
   render () {
     return <div className="appRoot">
-      <h1>{config.title}</h1>
-      <Cart cart={this.props.state.cart} />
+      <AudioRecorder stream={this.props.state.stream} />
     </div>;
   }
 }
