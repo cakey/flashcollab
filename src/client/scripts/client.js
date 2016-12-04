@@ -5,7 +5,7 @@ var attachElement = document.getElementById('app');
 
 var app;
 
-Debug.enable('myApp*');
+Debug.enable('myApp*,Audio'); //Audio/Chunk
 
 // fork getUserMedia for multiple browser versions, for the future
 // when more browsers support MediaRecorder

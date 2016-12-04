@@ -5,6 +5,9 @@ import Debug from 'debug';
 import config from '../../../config/app';
 
 
+var debug = Debug('Audio');
+var chunk = Debug('Audio/chunk')
+
 class AudioRecorder extends React.Component {
 
   constructor(props) {
@@ -21,12 +24,12 @@ class AudioRecorder extends React.Component {
   }
 
   onDataAvailable(e) {
-    console.log("chunk");
+    chunk(e.data.size);
     this.state.chunks.push(e.data);
   }
 
   onMediaStop(e) {
-      console.log("data available after MediaRecorder.stop() called.");
+      debug("data available after MediaRecorder.stop() called.");
       var blob = new Blob(this.state.chunks, { 'type' : 'audio/ogg; codecs=opus' });
       this.state.chunks = [];
       var newClip = {
@@ -39,13 +42,13 @@ class AudioRecorder extends React.Component {
 
   onRecord() {
       this.state.mediaRecorder.start();
-      console.log("mr state: ", this.state.mediaRecorder.state);
-      console.log("recorder started");
+      debug("recorder started");
+      debug("mr state: ", this.state.mediaRecorder.state);
       this.setState({recording: true})
   }
 
   onDeleteClip(i) {
-    console.log("delete clip # ", i);
+    debug("delete clip # ", i);
     var newClips = this.state.clips.slice();
     newClips.splice(i, 1);
     this.setState({clips: newClips})
@@ -53,14 +56,13 @@ class AudioRecorder extends React.Component {
 
   onStopRecord() {
       this.state.mediaRecorder.stop();
-      console.log("mr state: ", this.state.mediaRecorder.state);
-      console.log("recorder stopped");
+      debug("recorder stopped");
+      debug("mr state: ", this.state.mediaRecorder.state);
     }
 
   render () {
 
     var clips = [];
-    console.log(this.state.clips.length);
     for (var i=0; i<this.state.clips.length; i++) {
       var url = window.URL.createObjectURL(this.state.clips[i].blob);
       clips.push(
