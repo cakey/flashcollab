@@ -22,6 +22,12 @@ body {
     height: 100%;
 }
 
+.images {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .wrapper {
   height: 100%;
   display: flex;

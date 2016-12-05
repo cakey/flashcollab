@@ -29,7 +29,7 @@ class AppRoot extends React.Component {
    */
   render () {
     return <div className="appRoot">
-      <AudioRecorder stream={this.props.state.stream} />
+      <AudioRecorder stream={this.props.state.stream} words={this.props.state.words} />
     </div>;
   }
 }

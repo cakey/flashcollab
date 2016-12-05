@@ -3,6 +3,7 @@
 import React, { Component, PropTypes } from 'react';
 import Debug from 'debug';
 import config from '../../../config/app';
+import keys from '../../../config/keys';
 
 
 var debug = Debug('Audio');
@@ -15,6 +16,7 @@ class AudioRecorder extends React.Component {
     var mr = new MediaRecorder(this.props.stream);
     mr.onstop = this.onMediaStop.bind(this);
     mr.ondataavailable = this.onDataAvailable.bind(this);
+    this.imageCache = new Map();
     this.state = {
       recording: false,
       chunks: [],
@@ -34,10 +36,42 @@ class AudioRecorder extends React.Component {
       this.state.chunks = [];
       var newClip = {
         blob: blob,
-        name: "my clip name",
+        name: this.nextWord.bind(this)(),
       }
       this.state.clips.push(newClip);
       this.setState({recording: false})
+  }
+
+  fetchImages(term) {
+    if (!config.imagesOn) {
+      return
+    }
+    var that = this;
+    if (this.imageCache.has(term)) {
+      return
+    }
+    var headers = new Headers({
+      "Ocp-Apim-Subscription-Key": keys.bingsearch
+    });
+
+  var myInit = { method: 'GET',
+                 headers: headers,
+                 mode: 'cors',
+                 cache: 'default' };
+
+   fetch('https://api.cognitive.microsoft.com/bing/v5.0/images/search?q='+term+'&count=10&offset=0&safeSearch=Moderate', myInit)
+   .then(function(response){
+    response.json().then(function(json){
+      debug(json);
+      var urls = []
+      for (let v of json.value) {
+        urls.push(v.contentUrl)
+        that.imageCache.set(term, urls);
+        that.forceUpdate();
+      }
+    })
+   })
+   return null
   }
 
   onRecord() {
@@ -60,6 +94,23 @@ class AudioRecorder extends React.Component {
       debug("mr state: ", this.state.mediaRecorder.state);
     }
 
+  nextWord() {
+    var doneWords = new Set();
+    for (let w of this.state.clips) {
+      doneWords.add(w.name);
+    }
+    var nextWord = null;
+    for (let w of this.props.words) {
+      if (!doneWords.has(w)) {
+        nextWord = w;
+        break
+      }
+    }
+
+    this.fetchImages.bind(this)(nextWord);
+    return nextWord;
+  }
+
   render () {
 
     var clips = [];
@@ -76,9 +127,21 @@ class AudioRecorder extends React.Component {
       )
     }
 
+    var images = [];
+    var nextWord = this.nextWord.bind(this)();
+    if (this.imageCache.has(nextWord)) {
+      var urls = this.imageCache.get(nextWord);
+      for (var i=0; i<6; i++){
+        images.push(
+          <image src={urls[i]} key={i} width="200" />
+        )
+      }
+    }
+
     return <div className="wrapper">
       <header>
-        <h1>{config.title}</h1>
+        <h1>next word: {nextWord}</h1>
+        <div className="images">{images}</div>
       </header>
       <section className="main-controls">
         <div className="buttons">
@@ -108,7 +171,8 @@ class AudioRecorder extends React.Component {
 
 // Prop types validation
 AudioRecorder.propTypes = {
-  // state: React.PropTypes.object.isRequired,
+  stream: React.PropTypes.any.isRequired,
+  words: React.PropTypes.array.isRequired,
 };
 
 export default AudioRecorder;
