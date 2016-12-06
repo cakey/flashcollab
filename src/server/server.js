@@ -20,9 +20,15 @@ app.get('/', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../client/index.html'));
 });
 
-app.post('/api/clip/:clipName', (req, res) => {
+app.get('/api/word', (req, res) => {
+  db.map("SELECT a.* FROM words a NATURAL LEFT JOIN clips b WHERE b.wordID is NULL limit 50;", function(err, map) {
+      res.json(map)
+  });
+})
+
+app.post('/api/clip/:clipID', (req, res) => {
     var id = uuid();
-    console.log(req.params.clipName);
+    console.log(req.params.clipID);
     var size = 0;
 
     var data = new Buffer('');
@@ -37,8 +43,9 @@ app.post('/api/clip/:clipName', (req, res) => {
             if(err) {
                 return console.log(err);
             }
+            var getId
             var stmt = db.prepare("INSERT INTO clips VALUES (?, ?, ?)");
-            stmt.run(req.params.clipName, id, 1);
+            stmt.run(req.params.clipID, id, 1);
             stmt.finalize();
             console.log("The file was saved!");
             res.end("looks good to me");

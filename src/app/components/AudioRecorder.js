@@ -5,9 +5,20 @@ import Debug from 'debug';
 import config from '../../../config/app';
 import keys from '../../../config/keys';
 
-
 var debug = Debug('Audio');
 var chunk = Debug('Audio/chunk')
+
+var union = function(a, b) {
+  return new Set([...a, ...b]);
+}
+
+var intersection = function(a, b) {
+  return new Set([...a].filter(x => b.has(x)));
+}
+
+var difference = function(a, b) {
+  return  new Set([...a].filter(x => !b.has(x)));
+}
 
 class AudioRecorder extends React.Component {
 
@@ -18,12 +29,18 @@ class AudioRecorder extends React.Component {
     mr.ondataavailable = this.onDataAvailable.bind(this);
     this.imageCache = new Map();
     this.submittedWords = new Set();
+    this.availableWords = new Map();
     this.state = {
       recording: false,
       chunks: [],
       mediaRecorder: mr,
       clips: [],
+      nextWord: null,
     }
+  }
+
+  componentDidMount() {
+    this.nextWord();
   }
 
   onDataAvailable(e) {
@@ -37,9 +54,10 @@ class AudioRecorder extends React.Component {
       this.state.chunks = [];
       var newClip = {
         blob: blob,
-        name: this.nextWord.bind(this)(),
+        name: this.state.nextWord,
       }
       this.state.clips.push(newClip);
+      this.nextWord()
       this.setState({recording: false})
   }
 
@@ -85,7 +103,8 @@ class AudioRecorder extends React.Component {
 
   onSubmitClip(i) {
     var name = this.state.clips[i].name;
-    debug("submit clip # ", name);
+    var id = this.availableWords.get(name);
+    debug("submit clip # ", name, id);
     // var newClips = this.state.clips.slice();
     // newClips.splice(i, 1);
     // this.setState({clips: newClips})
@@ -93,7 +112,7 @@ class AudioRecorder extends React.Component {
     //submit clip!
     var that = this;
     var oReq = new XMLHttpRequest();
-    oReq.open("POST", "/api/clip/"+name, true);
+    oReq.open("POST", "/api/clip/"+id, true);
     oReq.onload = function (oEvent) {
       // Uploaded.
         debug("submitted clip # ", name);
@@ -106,9 +125,13 @@ class AudioRecorder extends React.Component {
 
   onDeleteClip(i) {
     debug("delete clip # ", i);
+    var justDeleted = this.state.clips[i].name
     var newClips = this.state.clips.slice();
     newClips.splice(i, 1);
-    this.setState({clips: newClips})
+    // reset nextWord as when user deletes a clip they will want to rerecord it!
+    this.setState({clips: newClips, nextWord: justDeleted})
+    this.nextWord()
+
   }
 
   onStopRecord() {
@@ -117,24 +140,63 @@ class AudioRecorder extends React.Component {
       debug("mr state: ", this.state.mediaRecorder.state);
     }
 
-  nextWord() {
-    var doneWords = new Set();
+  getPendingWords() {
+    var pending = new Set();
     for (let w of this.state.clips) {
-      doneWords.add(w.name);
+      pending.add(w.name);
     }
-    for (let name of this.submittedWords) {
-      doneWords.add(name);
+    debug("pending", pending)
+    return pending;
+  }
+
+  getValidWords() {
+    var availableWords = new Set();
+    this.availableWords.forEach(function(value, key) {
+      availableWords.add(key);
+    });
+    var validWords = difference(difference(availableWords, this.submittedWords), this.getPendingWords());
+    return validWords;
+  }
+
+  updateAvailable() {
+    var that = this;
+    if (this.getValidWords().size < 5) {
+      fetch('/api/word')
+        .then(function(response) {
+          response.json().then(function(data){
+            debug("update available", data)
+            that.availableWords.clear()
+            for (var key in data) {
+                that.availableWords.set(data[key], key);
+            }
+            that.nextWord();
+          });
+        })
     }
-    var nextWord = null;
-    for (let w of this.props.words) {
-      if (!doneWords.has(w)) {
-        nextWord = w;
-        break
-      }
+  }
+
+  nextWord() {
+    debug("check nextWord(), current: ", this.state.nextWord);
+    this.updateAvailable();
+
+    // if current word is valid then leave it.
+    var validWords = this.getValidWords();
+    debug("validWords", validWords);
+    if (validWords.has(this.state.nextWord)) {
+      debug("early return");
+      return
     }
 
-    this.fetchImages.bind(this)(nextWord);
-    return nextWord;
+    // otherwise choose new nextWord and update state
+    if (validWords.size == 0) {
+      debug("size", validWords.size);
+      return
+    }
+    var newNextWord = validWords.values().next().value;
+    console.log(newNextWord)
+    this.setState({nextWord: newNextWord});
+
+    this.fetchImages.bind(this)(newNextWord);
   }
 
   render () {
@@ -157,9 +219,8 @@ class AudioRecorder extends React.Component {
     }
 
     var images = [];
-    var nextWord = this.nextWord.bind(this)();
-    if (this.imageCache.has(nextWord)) {
-      var urls = this.imageCache.get(nextWord);
+    if (this.imageCache.has(this.state.nextWord)) {
+      var urls = this.imageCache.get(this.state.nextWord);
       for (var i=0; i<6; i++){
         images.push(
           <image src={urls[i]} key={i} width="200" />
@@ -169,7 +230,7 @@ class AudioRecorder extends React.Component {
 
     return <div className="wrapper">
       <header>
-        <h1>next word: {nextWord}</h1>
+        <h1>next word: {this.state.nextWord}</h1>
         <div className="images">{images}</div>
       </header>
       <section className="main-controls">
