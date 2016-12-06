@@ -17,6 +17,7 @@ class AudioRecorder extends React.Component {
     mr.onstop = this.onMediaStop.bind(this);
     mr.ondataavailable = this.onDataAvailable.bind(this);
     this.imageCache = new Map();
+    this.submittedWords = new Set();
     this.state = {
       recording: false,
       chunks: [],
@@ -81,6 +82,28 @@ class AudioRecorder extends React.Component {
       this.setState({recording: true})
   }
 
+
+  onSubmitClip(i) {
+    var name = this.state.clips[i].name;
+    debug("submit clip # ", name);
+    // var newClips = this.state.clips.slice();
+    // newClips.splice(i, 1);
+    // this.setState({clips: newClips})
+
+    //submit clip!
+    var that = this;
+    var oReq = new XMLHttpRequest();
+    oReq.open("POST", "/api/clip/"+name, true);
+    oReq.onload = function (oEvent) {
+      // Uploaded.
+        debug("submitted clip # ", name);
+        that.submittedWords.add(name);
+        that.onDeleteClip(i);
+    };
+    oReq.send(this.state.clips[i].blob);
+
+  }
+
   onDeleteClip(i) {
     debug("delete clip # ", i);
     var newClips = this.state.clips.slice();
@@ -98,6 +121,9 @@ class AudioRecorder extends React.Component {
     var doneWords = new Set();
     for (let w of this.state.clips) {
       doneWords.add(w.name);
+    }
+    for (let name of this.submittedWords) {
+      doneWords.add(name);
     }
     var nextWord = null;
     for (let w of this.props.words) {
@@ -120,6 +146,9 @@ class AudioRecorder extends React.Component {
         <article className="clip" key={i} >
           <audio controls src={url} />
           <p>{this.state.clips[i].name}</p>
+          <button className="submit" onClick={this.onSubmitClip.bind(this, i)}>
+            Submit
+          </button>
           <button className="delete" onClick={this.onDeleteClip.bind(this, i)}>
             Delete
           </button>

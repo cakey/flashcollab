@@ -119,6 +119,13 @@ button.delete {
   font-size: 0.8rem;
 }
 
+button.submit {
+  background: #5bbb57;
+  padding: 0.5rem 0.75rem;
+  margin-left: 1rem;
+  font-size: 0.8rem;
+}
+
 /* Cursor when clip name is clicked over */
 
 .clip p {
