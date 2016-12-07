@@ -5,52 +5,7 @@ var attachElement = document.getElementById('app');
 
 var app;
 
-Debug.enable('myApp*,Audio'); //Audio/Chunk
-
-var words = [
-  "Camel",
-  "Cape buffalo",
-  "Capybara",
-  "Cardinal",
-  "Caribou",
-  "Carp",
-  "Cat   (list)",
-  "Catshark",
-  "Caterpillar",
-  "Catfish",
-  "Cattle   (list)",
-  "Centipede",
-  "Cephalopod",
-  "Chameleon",
-  "Cheetah",
-  "Chickadee",
-  "Chicken   (list)",
-  "Chimpanzee",
-  "Chinchilla",
-  "Chipmunk",
-  "Clam",
-  "Clownfish",
-  "Cobra",
-  "Cockroach",
-  "Cod",
-  "Condor",
-  "Constrictor",
-  "Coral",
-  "Cougar",
-  "Cow",
-  "Coyote",
-  "Crab",
-  "Crane",
-  "Crane fly",
-  "Crawdad",
-  "Crayfish",
-  "Cricket",
-  "Crocodile",
-  "Crow",
-  "Cuckoo",
-  "Cicada"
-]
-
+Debug.enable('myApp*,Audio,AppRoot,Learn'); //Audio/Chunk
 
 // fork getUserMedia for multiple browser versions, for the future
 // when more browsers support MediaRecorder
@@ -69,7 +24,6 @@ var onSuccess = function(stream) {
   app = new App({
     state: {
       stream: stream,
-      words: words,
     }
   });
   app.renderToDOM(attachElement);

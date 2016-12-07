@@ -20,6 +20,14 @@ var difference = function(a, b) {
   return  new Set([...a].filter(x => !b.has(x)));
 }
 
+var mapKeystoSet = function(a) {
+    var b = new Set();
+    a.forEach(function(value, key) {
+      b.add(key);
+    });
+    return b;
+}
+
 class AudioRecorder extends React.Component {
 
   constructor(props) {
@@ -30,6 +38,7 @@ class AudioRecorder extends React.Component {
     this.imageCache = new Map();
     this.submittedWords = new Set();
     this.availableWords = new Map();
+    this.lastAvailableCount = 999;
     this.state = {
       recording: false,
       chunks: [],
@@ -150,26 +159,33 @@ class AudioRecorder extends React.Component {
   }
 
   getValidWords() {
-    var availableWords = new Set();
-    this.availableWords.forEach(function(value, key) {
-      availableWords.add(key);
-    });
+    var availableWords = mapKeystoSet(this.availableWords);
+
     var validWords = difference(difference(availableWords, this.submittedWords), this.getPendingWords());
     return validWords;
   }
 
   updateAvailable() {
     var that = this;
-    if (this.getValidWords().size < 5) {
+
+    if (this.getValidWords().size < 5 && (this.lastAvailableCount >= 5 || this.getPendingWords().size == 0)) {
       fetch('/api/word')
         .then(function(response) {
           response.json().then(function(data){
             debug("update available", data)
-            that.availableWords.clear()
+            var newAvailableWords = new Map();
             for (var key in data) {
-                that.availableWords.set(data[key], key);
+                newAvailableWords.set(data[key], key);
             }
-            that.nextWord();
+            var availableSet = mapKeystoSet(newAvailableWords);
+
+            that.lastAvailableCount = availableSet.size;
+            var inBoth = intersection(availableSet, mapKeystoSet(that.availableWords));
+            // call nextWord only if the list has changed!
+            if (inBoth.size != availableSet.size || availableSet.size == 0) {
+              that.availableWords = newAvailableWords;
+              that.nextWord();
+            }
           });
         })
     }
@@ -177,7 +193,9 @@ class AudioRecorder extends React.Component {
 
   nextWord() {
     debug("check nextWord(), current: ", this.state.nextWord);
-    this.updateAvailable();
+    if (this.lastAvailableCount != 0) {
+      this.updateAvailable();
+    }
 
     // if current word is valid then leave it.
     var validWords = this.getValidWords();
@@ -190,6 +208,7 @@ class AudioRecorder extends React.Component {
     // otherwise choose new nextWord and update state
     if (validWords.size == 0) {
       debug("size", validWords.size);
+      this.setState({nextWord: null});
       return
     }
     var newNextWord = validWords.values().next().value;
@@ -228,9 +247,19 @@ class AudioRecorder extends React.Component {
       }
     }
 
+    var nextWordSection = <h1>next word: {this.state.nextWord}</h1>
+    if (!this.state.nextWord) {
+      if (mapKeystoSet(this.availableWords).size > 0) {
+        debug("avail", this.availableWords);
+        nextWordSection = <h1>Word Limit reached, submit to see more.</h1>
+      } else {
+        nextWordSection = <h1>No words left :)</h1>
+      }
+    }
+
     return <div className="wrapper">
       <header>
-        <h1>next word: {this.state.nextWord}</h1>
+        {nextWordSection}
         <div className="images">{images}</div>
       </header>
       <section className="main-controls">
@@ -262,7 +291,6 @@ class AudioRecorder extends React.Component {
 // Prop types validation
 AudioRecorder.propTypes = {
   stream: React.PropTypes.any.isRequired,
-  words: React.PropTypes.array.isRequired,
 };
 
 export default AudioRecorder;

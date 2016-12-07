@@ -51,6 +51,9 @@ var words = [
 
 db.serialize(function() {
     db.run("CREATE TABLE clips (wordID int, clipID TEXT, userID int)");
+    db.run("CREATE TABLE images (wordID int, url TEXT)");
+    db.run("CREATE TABLE users (userID integer primary key autoincrement, name TEXT unique)");
+    db.run("CREATE TABLE reviews (wordID int, userID int, firstSeenTime datetime, answerTime datetime, dueTime datetime)");
     db.run("CREATE TABLE words (wordID integer primary key autoincrement, word TEXT)");
 
     var stmt = db.prepare("INSERT INTO words VALUES (?, ?)");

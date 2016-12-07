@@ -1,12 +1,6 @@
 // adapted from https://github.com/mdn/web-dictaphone
 
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 html, body {
   height: 100%;
 }
@@ -14,6 +8,9 @@ html, body {
 body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.8rem;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 
@@ -124,6 +121,46 @@ button.submit {
   padding: 0.5rem 0.75rem;
   margin-left: 1rem;
   font-size: 0.8rem;
+}
+
+button.mode {
+    width: 10rem;
+    height: 10rem;
+    margin: 1rem;
+}
+
+div.mode {
+    margin: 0 auto;
+    max-width: 1000px;
+    text-align: center;
+}
+
+input.login {
+  font-size: 1rem;
+  text-align: center;
+  color: #0088cc;
+  max-width: 300px;
+  transition: all 0.2s;
+  padding: 0.5rem;
+  margin-right: 1rem;
+}
+
+.login {
+    margin: 0 auto;
+    width: 90%;
+    max-width: 1000px;
+    text-align: center;
+}
+
+.user {
+    position: fixed;
+    width: 100%;
+    text-align: right;
+    padding-right: 2rem;
+    padding-top: 0.5rem;
+    box-sizing: border-box;
+    display: block;
+
 }
 
 /* Cursor when clip name is clicked over */
