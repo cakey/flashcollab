@@ -66,20 +66,29 @@ app.get('/api/images/:wordID', (req, res) => {
                   if (!error && response.statusCode == 200) {
                     var data = JSON.parse(body);
                     console.log(data.value[0]);
-                    var urls = [];
+                    var urlsList = [];
                     for (let v of data.value) {
-                        // thumbnail urls are shorter, but also avoid 404/403s etc
-                        urls.push(v.thumbnailUrl)
+                        // thumbnail urlsList are shorter, but also avoid 404/403s etc
+                        urlsList.push(v.thumbnailUrl)
                     }
-                    console.log(urls)
-                    res.json({"images": urls})
+                    res.json({"images": urlsList})
+                    var stmt = db.prepare("INSERT INTO images VALUES (?, ?)");
+                    for (let u of urlsList) {
+                        stmt.run(req.params.wordID, u);
+                    }
+                    stmt.finalize();
                   }
                 }
 
                 request(options, callback);
 
             } else {
-                console.log("images cached");
+                console.log("images cached: ", urls[0].word);
+                var urlsList = [];
+                for (let u of urls) {
+                    urlsList.push(u.url);
+                }
+                res.json({"images": urlsList})
             }
         console.log(err);
     })
