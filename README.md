@@ -1,13 +1,4 @@
-# The React Way: Getting Started
-
-[![Build Status](https://travis-ci.org/RisingStack/react-way-getting-started.svg?branch=master)](https://travis-ci.org/RisingStack/react-way-getting-started)  
-
-**Related blog post:**  
-http://blog.risingstack.com/the-react-way-getting-started-tutorial/
-
-Getting started with React and ES6
-
-Used technologies:  
+Used technologies:
 
 - React
 - ES6
@@ -17,7 +8,7 @@ Used technologies:
 
 ## How to start
 
-Run:  
+Run:
 ```
 npm install
 npm start
@@ -31,9 +22,22 @@ Check your http://localhost:3000/ or  `open http://localhost:3000/`
 
 ## How to start code
 
-Run:  
+Run:
 `npm run webpack-watch`
 
-## Preview
+## TODO
 
-![screen shot 2015-04-11 at 11 48 41](https://cloud.githubusercontent.com/assets/1764512/7101012/cf4334fc-e040-11e4-9f28-aed24d68e46a.png)
+switch to promises
+tests
+multi users
+api limits/checks/security (max limit on file upload)
+backup mechanic
+host
+test with ie
+clean up AudioRecorder to just use react state!
+keyboard shortcuts
+move to => function style
+db.map => db.all where appropriate...
+remove fetchImages from AudioRecorder
+use import
+

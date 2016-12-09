@@ -38,21 +38,37 @@ class LoginForm extends React.Component {
   }
 }
 
+function json(response) {
+  return response.json()
+}
+
 class AppRoot extends React.Component {
 
   constructor(props) {
     super(props)
     this.state = {
-      currentUser: "ben",
-      mode: null,
+      // currentUserName: null,
+      // currentUserID: 0,
+      // mode: null,
+      currentUserName: "ben",
+      currentUserID: 47,
+      mode: "learn",
     }
     this.onLogin = this.onLogin.bind(this);
 
   }
 
   onLogin(name) {
+    var that = this;
     console.log("logging in: ", name);
-    this.setState({currentUser: name});
+    fetch("/api/user/name/"+name)
+    .then(json)
+    .then(function(data) {
+      that.setState({
+        currentUserName: data.name,
+        currentUserID: data.id,
+      });
+    })
   }
 
   onSelectMode(mode) {
@@ -62,21 +78,25 @@ class AppRoot extends React.Component {
 
   render () {
     var widget = null;
-    if (!this.state.currentUser) {
+    if (!this.state.currentUserName) {
       widget = <LoginForm onSubmit={this.onLogin}/>
     } else if (!this.state.mode) {
       widget = <div className="mode">
-        <h1>Hello, {this.state.currentUser} </h1>
+        <h1>Hello, {this.state.currentUserName} </h1>
         <button className="mode" onClick={this.onSelectMode.bind(this, "learn")}>Learn</button>
         <button className="mode" onClick={this.onSelectMode.bind(this, "contribute")}>Contribute</button>
       </div>;
     } else if (this.state.mode == "learn") {
-      widget = <Learn stream={this.props.state.stream} user={this.state.currentUser} />;
+      widget = <Learn
+        stream={this.props.state.stream}
+        username={this.state.currentUserName}
+        userid={this.state.currentUserID}
+      />;
     } else {
       widget = <AudioRecorder stream={this.props.state.stream} />;
     }
     return <div className="appRoot">
-      <div className="user">{this.state.currentUser} | {this.state.mode} </div>
+      <div className="user">{this.state.currentUserName} | {this.state.mode} </div>
       {widget}
     </div>;
   }
