@@ -27,17 +27,17 @@ Run:
 
 ## TODO
 
-switch to promises
-tests
-multi users
-api limits/checks/security (max limit on file upload)
-backup mechanic
-host
-test with ie
-clean up AudioRecorder to just use react state!
-keyboard shortcuts
-move to => function style
-db.map => db.all/get where appropriate...
-remove fetchImages from AudioRecorder
-use import
+- switch to promises
+- tests
+- multi users
+- api limits/checks/security (max limit on file upload)
+- backup mechanic
+- host
+- test with ie
+- clean up AudioRecorder to just use react state!
+- keyboard shortcuts
+- move to => function style
+- db.map => db.all/get where appropriate...
+- remove fetchImages from AudioRecorder
+- use import
 
