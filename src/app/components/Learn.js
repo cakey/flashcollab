@@ -24,29 +24,30 @@ class Learn extends React.Component {
     this.getAvailableReviews = this.getAvailableReviews.bind(this);
     this.onStart = this.onStart.bind(this);
     this.getImages = this.getImages.bind(this);
-    this.removeImage = this.removeImage.bind(this);
+    this.onShowAnswer = this.onShowAnswer.bind(this);
   }
 
   componentDidMount() {
     this.getAvailableReviews();
   }
+
   onStart() {
     this.setState({started: true});
   }
 
-  removeImage(wordID, url) {
-    // TODO and feed the 404/401 back to the server ;)
-    debug("removeImage", url)
-    var newMap = new Map(that.state.imageCache);
-    newMap[wordID] = newMap[wordID].filter((k) => k != url);
-    this.setState({"imageCache": newMap});
+  onShowAnswer() {
+    this.setState({guessed: true});
   }
 
   getImages(wordID) {
     var that = this;
     if (this.state.imageCache.has(wordID)) {
-      return this.state.imageCache.get(wordID);
+      debug(wordID, " found in cache");
+      var returnee = this.state.imageCache.get(wordID);
+      debug(returnee);
+      return returnee
     }
+    debug(wordID, " not in cache");
     debug("fetching images")
     fetch("/api/images/"+wordID)
     .then(json)
@@ -54,9 +55,10 @@ class Learn extends React.Component {
       debug("fetched images: ", data)
       var newMap = new Map(that.state.imageCache);
       if (data.images) {
-        newMap.set(wordID, data.images)
+        // randomise set, but can't randomise within a session!!
+        newMap.set(wordID, _(data.images).shuffle().take(2).value());
       } else {
-        newMap.set(wordID, false)
+        newMap.set(wordID, false);
       }
       that.setState({"imageCache": newMap});
     })
@@ -87,13 +89,24 @@ class Learn extends React.Component {
       debug("next review: ", nextReview);
       if (nextReview.format == 1) {
         var images = this.getImages(nextReview.wordID);
-        debug("images: ", images);
         var imgs = [];
-        _(images).shuffle().take(4).each((i, key) => {
-          imgs.push(<img className="learn" key={key} src={i} onerror={this.removeImage.bind(this, nextReview.wordID, i)} />)
+        _(images).each((i, key) => {
+          imgs.push(<img className="learn" key={key} src={i} />)
         });
-        widget = <div className="images">
-          {imgs}
+
+        var answerWidget;
+        if (!this.state.guessed) {
+          answerWidget = <button onClick={this.onShowAnswer} className="showAnswer">(Show Answer)</button>
+        } else {
+          answerWidget = <div> {this.state.availableReviews[0].word} </div>
+        }
+
+        widget = <div className="learnwidget">
+          <h1>What is...</h1>
+          <div className="images">
+            {imgs}
+          </div>
+          <h1> {answerWidget} </h1>
         </div>
       }
     }

@@ -37,7 +37,7 @@ test with ie
 clean up AudioRecorder to just use react state!
 keyboard shortcuts
 move to => function style
-db.map => db.all where appropriate...
+db.map => db.all/get where appropriate...
 remove fetchImages from AudioRecorder
 use import
 
