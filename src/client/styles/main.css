@@ -180,6 +180,11 @@ img.learn {
     margin: 1rem;
 }
 
+.learn-wrapper {
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
 
 /* Cursor when clip name is clicked over */
 

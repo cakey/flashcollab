@@ -51,7 +51,7 @@ class AppRoot extends React.Component {
       // currentUserID: 0,
       // mode: null,
       currentUserName: "ben",
-      currentUserID: 47,
+      currentUserID: 1,
       mode: "learn",
     }
     this.onLogin = this.onLogin.bind(this);

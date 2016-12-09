@@ -71,6 +71,8 @@ class AudioRecorder extends React.Component {
   }
 
   fetchImages(term) {
+    // fix to use server API etc
+    return
     if (!config.imagesOn) {
       return
     }
@@ -242,7 +244,7 @@ class AudioRecorder extends React.Component {
       var urls = this.imageCache.get(this.state.nextWord);
       for (var i=0; i<6; i++){
         images.push(
-          <image src={urls[i]} key={i} width="200" />
+          <img src={urls[i]} key={i} width="200" />
         )
       }
     }

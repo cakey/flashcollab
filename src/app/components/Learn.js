@@ -98,7 +98,10 @@ class Learn extends React.Component {
         if (!this.state.guessed) {
           answerWidget = <button onClick={this.onShowAnswer} className="showAnswer">(Show Answer)</button>
         } else {
-          answerWidget = <div> {this.state.availableReviews[0].word} </div>
+          answerWidget = <div className="learn-wrapper">
+            <h1>{this.state.availableReviews[0].word}</h1>
+              <audio controls autoPlay src={"/api/clip/" + this.state.availableReviews[0].clipID} />
+          </div>
         }
 
         widget = <div className="learnwidget">
@@ -106,7 +109,7 @@ class Learn extends React.Component {
           <div className="images">
             {imgs}
           </div>
-          <h1> {answerWidget} </h1>
+          {answerWidget}
         </div>
       }
     }

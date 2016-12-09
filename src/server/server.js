@@ -140,6 +140,20 @@ app.get('/api/word', (req, res) => {
   });
 })
 
+app.get('/api/clip/:clipID', (req, res) => {
+    if (!uuid.valid(req.params.clipID)) {
+        // sanitise the input before giving access to our file system ;)
+        res.json({error: "paramater expected to be UUID"})
+        return
+    }
+    fs.readFile("data/clips/"+req.params.clipID, (err, data) => {
+        if (err) {
+            console.log("err for clip: ", req.params.clipID)
+        }
+        res.end(data);
+    });
+});
+
 app.post('/api/clip/:clipID', (req, res) => {
     var id = uuid();
     console.log(req.params.clipID);
