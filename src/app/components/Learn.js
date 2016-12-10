@@ -25,6 +25,9 @@ class Learn extends React.Component {
     this.onStart = this.onStart.bind(this);
     this.getImages = this.getImages.bind(this);
     this.onShowAnswer = this.onShowAnswer.bind(this);
+    this.imageWidget = this.imageWidget.bind(this);
+    this.audioWidget = this.audioWidget.bind(this);
+    this.textWidget = this.textWidget.bind(this);
   }
 
   componentDidMount() {
@@ -75,6 +78,49 @@ class Learn extends React.Component {
     })
   }
 
+  onGuess(guess) {
+    debug("guess: ", guess);
+    var currentReview = this.state.availableReviews[0];
+
+    var that = this;
+
+    var data = {
+        format: currentReview.format,
+        wordID: currentReview.wordID,
+        userID: this.props.userID,
+      }
+    fetch("/api/reviews", {method: "POST", body: JSON.stringify(data)})
+    .then(json)
+    .then(function(data){
+      that.setState({
+        availableReviews: _.tail(that.state.availableReviews),
+        guessed: false,
+      })
+    })
+  }
+
+
+  imageWidget(review) {
+    var images = this.getImages(review.wordID);
+    var imgs = [];
+    _(images).each((i, key) => {
+      imgs.push(<img className="learn" key={key} src={i} />)
+    });
+    return <div className="images">
+        {imgs}
+      </div>
+  }
+
+  audioWidget(review) {
+    return <div className="learn-wrapper">
+        <audio controls autoPlay src={"/api/clip/" + review.clipID} />
+    </div>
+  }
+
+  textWidget(review) {
+    return <h1>{review.word}</h1>
+  }
+
   render () {
 
     var widget;
@@ -87,31 +133,64 @@ class Learn extends React.Component {
     } else {
       var nextReview = this.state.availableReviews[0];
       debug("next review: ", nextReview);
+      var questionWidget = null
+
       if (nextReview.format == 1) {
-        var images = this.getImages(nextReview.wordID);
-        var imgs = [];
-        _(images).each((i, key) => {
-          imgs.push(<img className="learn" key={key} src={i} />)
-        });
-
-        var answerWidget;
-        if (!this.state.guessed) {
-          answerWidget = <button onClick={this.onShowAnswer} className="showAnswer">(Show Answer)</button>
-        } else {
+        questionWidget = this.imageWidget(nextReview);
+      } else if (nextReview.format == 2) {
+        questionWidget = this.audioWidget(nextReview);
+      } else if (nextReview.format == 3) {
+        questionWidget = this.textWidget(nextReview);
+      } else{
+        questionWidget = <div>Card cannot be displayed :(</div>
+      }
+      var answerWidget;
+      if (this.state.guessed) {
+        if (nextReview.format == 1) {
           answerWidget = <div className="learn-wrapper">
-            <h1>{this.state.availableReviews[0].word}</h1>
-              <audio controls autoPlay src={"/api/clip/" + this.state.availableReviews[0].clipID} />
+            {this.textWidget(nextReview)}
+            {this.audioWidget(nextReview)}
           </div>
+        } else if (nextReview.format == 2) {
+          answerWidget = <div className="learn-wrapper">
+            {this.textWidget(nextReview)}
+            {this.imageWidget(nextReview)}
+          </div>
+        } else if (nextReview.format == 3) {
+          answerWidget = <div className="learn-wrapper">
+            {this.imageWidget(nextReview)}
+            {this.audioWidget(nextReview)}
+          </div>
+        } else{
+          answerWidget = <div>Answer cannot be displayed :(</div>
         }
+      }
 
-        widget = <div className="learnwidget">
-          <h1>What is...</h1>
-          <div className="images">
-            {imgs}
-          </div>
-          {answerWidget}
+      var responseWidget;
+      if (!this.state.guessed) {
+        responseWidget = <button onClick={this.onShowAnswer} className="showAnswer">Show Answer</button>
+      } else {
+        responseWidget = <div className="learn-wrapper">
+            <button onClick={this.onGuess.bind(this, 0)} className="guessResponse">
+              Wrong (Again!)
+            </button>
+            <button onClick={this.onGuess.bind(this, 1)} className="guessResponse">
+              Ok
+            </button>
+            <button onClick={this.onGuess.bind(this, 2)} className="guessResponse">
+              Good
+            </button>
+            <button onClick={this.onGuess.bind(this, 3)} className="guessResponse">
+              Easy
+            </button>
         </div>
       }
+        widget = <div className="learnwidget">
+          <h1>What is...</h1>
+          {questionWidget}
+          {answerWidget}
+          {responseWidget}
+        </div>
     }
     return widget
   }

@@ -95,10 +95,16 @@ app.get('/api/images/:wordID', (req, res) => {
     // if no images in db, then fetch from bing, and insert into DB
 })
 
+app.post('/api/reviews', (req, res) => {
+    console.log("post review");
+    console.log(req.body);
+    res.json({success: true});
+});
+
 
 // Which reviews are ready for the user?
 app.get('/api/reviews/:userID', (req, res) => {
-    console.log("reviews");
+    console.log("get reviews");
     db.map("SELECT wordID, firstSeenTime, format FROM reviews WHERE userID=? AND dueTime < date('now');", [req.params.userID], function(err, reviewMap) {
         db.map("SELECT a.wordID, a.word, b.clipID FROM words a NATURAL INNER JOIN clips b where b.wordID is NOT NULL", function(err, newMap) {
             var w = 0;
