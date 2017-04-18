@@ -40,4 +40,4 @@ Run:
 - db.map => db.all/get where appropriate...
 - remove fetchImages from AudioRecorder
 - use import
-
+- last review

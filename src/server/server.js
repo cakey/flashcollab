@@ -1,5 +1,7 @@
 import path from 'path';
 import Express from 'express';
+var bodyParser = require('body-parser');
+
 
 var request = require('request');
 var uuid = require('uuid4');
@@ -18,6 +20,7 @@ const PATH_DIST = path.resolve(__dirname, '../../dist');
 
 app.use('/styles', Express.static(PATH_STYLES));
 app.use(Express.static(PATH_DIST));
+app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../client/index.html'));
@@ -98,6 +101,25 @@ app.get('/api/images/:wordID', (req, res) => {
 app.post('/api/reviews', (req, res) => {
     console.log("post review");
     console.log(req.body);
+    var b = req.body;
+    db.get("SELECT * from reviews WHERE userID=? AND wordID=? AND format=?", [b.userID, b.wordID, b.format], (err, row) => {
+        console.log(err);
+        console.log(row);
+        if (!row) {
+            console.log("insert");
+            db.get("INSERT INTO reviews (wordID, userID, format, firstSeenTime) VALUES (?, ?, ?, ?)", [b.wordID, b.userID, b.format, new Date()], (err, row) => {
+                if (err) {
+                    console.log(err)
+                }
+                console.log(row)
+                console.log("done")
+            });
+        } else {
+            console.log("update");
+        }
+    })
+    // (wordID int, userID int, format int, firstSeenTime datetime, answerTime datetime, dueTime datetime)
+
     res.json({success: true});
 });
 

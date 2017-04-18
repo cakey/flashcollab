@@ -47,12 +47,12 @@ class AppRoot extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      // currentUserName: null,
-      // currentUserID: 0,
-      // mode: null,
-      currentUserName: "ben",
-      currentUserID: 1,
-      mode: "learn",
+      currentUserName: null,
+      currentUserID: 0,
+      mode: null,
+      // currentUserName: "ben",
+      // currentUserID: 1,
+      // mode: "learn",
     }
     this.onLogin = this.onLogin.bind(this);
 
@@ -90,7 +90,7 @@ class AppRoot extends React.Component {
       widget = <Learn
         stream={this.props.state.stream}
         username={this.state.currentUserName}
-        userid={this.state.currentUserID}
+        userID={this.state.currentUserID}
       />;
     } else {
       widget = <AudioRecorder stream={this.props.state.stream} />;

@@ -69,7 +69,7 @@ class Learn extends React.Component {
 
   getAvailableReviews() {
     var that = this;
-    fetch("/api/reviews/"+this.props.userid)
+    fetch("/api/reviews/"+this.props.userID)
     .then(json)
     .then(function(data) {
       that.setState({
@@ -89,7 +89,16 @@ class Learn extends React.Component {
         wordID: currentReview.wordID,
         userID: this.props.userID,
       }
-    fetch("/api/reviews", {method: "POST", body: JSON.stringify(data)})
+
+    var conf = {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: "POST",
+      body: JSON.stringify(data)
+    }
+    fetch("/api/reviews", conf)
     .then(json)
     .then(function(data){
       that.setState({
@@ -172,7 +181,7 @@ class Learn extends React.Component {
       } else {
         responseWidget = <div className="learn-wrapper">
             <button onClick={this.onGuess.bind(this, 0)} className="guessResponse">
-              Wrong (Again!)
+              Wrong (Again)
             </button>
             <button onClick={this.onGuess.bind(this, 1)} className="guessResponse">
               Ok
@@ -198,7 +207,7 @@ class Learn extends React.Component {
 
 Learn.propTypes = {
   username: React.PropTypes.string.isRequired,
-  userid: React.PropTypes.number.isRequired,
+  userID: React.PropTypes.number.isRequired,
 };
 
 export default Learn;
